@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from utils.box_utils import intersection_over_union
+
 class DetectionLoss(nn.Module):
     def __init__(self, S=7, B=2, C=20):
         super(DetectionLoss, self).__init__()
