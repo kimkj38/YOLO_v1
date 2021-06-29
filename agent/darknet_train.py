@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-import cv2
-import time
+from torch.utils.data import DataLoader
+from datasets.dataset import VOCdataset
+import torchvision.transforms as transforms
 import numpy as np
 
 
@@ -124,4 +125,79 @@ def load_weights(file, net):
         conn_weights = conn_weights.T
         layer.weight.data.copy_(conn_weights)
 
+print_freq = 5
+lr = 0.001
+weight_decay = 5.0e-4
+num_epochs = 100
 
+
+#model
+darknet = DarkNet()
+
+#Loss, Optimizer
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(darknet.parameters(), lr = lr, weight_decay = weight_decay)
+
+#Load Dataset
+train_dataset =  VOCdataset(transforms=transforms.ToTensor(), mode='train')
+test_dataset =  VOCdataset(transforms=transforms.ToTensor(), mode='test')
+
+val_loader = DataLoader(dataset=train_dataset,
+                          batch_size=32,
+                          shuffle=True)
+
+val_loader = DataLoader(dataset=test_dataset,
+                         shuffle=False,
+                         batch_size=32)
+
+#Training Loop
+best_val_loss = np.inf
+
+for epoch in range(num_epochs):
+    print('\n')
+    print('Starting epoch {} / {}'.format(epoch, num_epochs))
+
+    # Training.
+    darknet.train()
+    total_loss = 0.0
+    total_batch = 0
+
+    for idx, (x, labels) in enumerate(train_loader):
+        batch_size_this_iter = x.size(0)
+
+        preds = darknet(x)
+        loss = criterion(preds, labels)
+        loss_this_iter = loss.item()
+        total_loss += loss_this_iter * batch_size_this_iter
+        total_batch += batch_size_this_iter
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # 현재 loss 출력
+        if idx % print_freq == 0:
+            print('Epoch [%d/%d], Iter [%d/%d], LR: %.6f, Loss: %.4f, Average Loss: %.4f'
+                  % (epoch, num_epochs, idx, len(train_loader), lr, loss_this_iter, total_loss / float(total_batch)))
+
+
+        # Validation.
+        darknet.eval()
+        val_loss = 0.0
+        total_batch = 0
+
+        for idx, (x, labels) in enumerate(val_loader):
+            # Load data as a batch.
+            batch_size_this_iter = x.size(0)
+
+            with torch.no_grad():
+                preds = darknet(x)
+            loss = criterion(preds, labels)
+            loss_this_iter = loss.item()
+            val_loss += loss_this_iter * batch_size_this_iter
+            total_batch += batch_size_this_iter
+        val_loss /= float(total_batch)
+
+        # Print.
+        print('Epoch [%d/%d], Val Loss: %.4f, Best Val Loss: %.4f'
+              % (epoch + 1, num_epochs, val_loss, best_val_loss))
