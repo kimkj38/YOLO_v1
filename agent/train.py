@@ -1,3 +1,4 @@
+import os
 import torch
 from model import YOLOv1
 from loss import DetectionLoss
@@ -10,6 +11,7 @@ def train():
     lr = 0.001
     weight_decay = 5.0e-4
     num_epochs = 100
+    dataset_dir = os.path.join(os.getcwd(), 'datasets')
 
     # model
     yolo = YOLOv1()
@@ -24,7 +26,7 @@ def train():
     optimizer = torch.optim.Adam(yolo.parameters(), lr=lr, weight_decay=weight_decay)
 
     # Load Dataset
-    train_loader, test_loader = get_data(dataset_dir='C:\\Users\\hy211\\PycharmProjects\\yolo_v1\\datasets')
+    train_loader, test_loader = get_data(dataset_dir=dataset_dir)
 
     for epoch in range(num_epochs):
         print('\n')
@@ -54,10 +56,10 @@ def train():
                       % (epoch, num_epochs, idx, len(train_loader), lr, loss_this_iter, total_loss / float(total_batch)))
 
             # Validation.
-            yolo.eval()
-            val_loss = 0.0
-            total_batch = 0
-
+            # yolo.eval()
+            # val_loss = 0.0
+            # total_batch = 0
+            #
             # for v_idx, (x_v, labels_v) in enumerate(val_loader):
             #     # Load data as a batch.
             #     batch_size_this_iter = x.size(0)

@@ -43,8 +43,7 @@ class VOCdataset(Dataset):
 
     def get_infos(self, mode='train'):
 
-        # annot_f = '{}/VOCdevkit/VOC2007/Annotations'
-        annot_f = '{}\VOCdevkit\VOC2007\Annotations'
+        annot_f = '{}/VOCdevkit/VOC2007/Annotations'
         
         classes = ['person', 'bird', 'cat', 'cow', 'dog', 'horse',
                    'sheep', 'aeroplane', 'bicycle', 'boat', 'bus', 'car',
