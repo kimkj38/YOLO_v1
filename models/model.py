@@ -115,7 +115,7 @@ class YOLOv1(nn.Module):
         x = self.leaky(self.conn_1(x))
         x = torch.squeeze(x)
 
-        return x
+        return x.view(-1, 7, 7, 30)
 
     def init_network(self):
         print('Initializing weights...')
