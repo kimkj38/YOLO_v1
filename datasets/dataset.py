@@ -28,7 +28,7 @@ class VOCdataset(Dataset):
         bboxs = record['bboxs']
         labels = record['labels']
 
-        img = Image.open(self.image_f.format(self.mode, img_id)).convert('RGB')
+        img = Image.open(pth.join(self.dataset_dir, self.image_f.format(self.mode, img_id))).convert('RGB')
         img = img.resize((self.resize_factor, self.resize_factor))
         img = np.array(img) 
 
