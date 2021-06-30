@@ -1,16 +1,19 @@
 import os
 import torch
-from model import YOLOv1
+from models import YOLOv1
 from loss import DetectionLoss
 from datasets import get_data
+import math
 # from torchsummary import summary
 
 
 def train():
     print_freq = 5
-    lr = 0.001
+    init_lr = 0.001
+    base_lr = 0.01
+    momentum = 0.9
     weight_decay = 5.0e-4
-    num_epochs = 100
+    num_epochs = 135
     dataset_dir = os.path.join(os.getcwd(), 'datasets')
 
     # model
@@ -23,7 +26,27 @@ def train():
 
     # Loss, Optimizer
     criterion = DetectionLoss()
-    optimizer = torch.optim.Adam(yolo.parameters(), lr=lr, weight_decay=weight_decay)
+    optimizer = torch.optim.SGD(yolo.parameters(), lr=init_lr, momentum=momentum, weight_decay=weight_decay)
+
+    # Learning rate scheduling.
+    def update_lr(optimizer, epoch, burnin_base, burnin_exp=4.0):
+        if epoch == 0:
+            lr = init_lr + (base_lr - init_lr) * math.pow(burnin_base, burnin_exp)
+        elif epoch == 1:
+            lr = base_lr
+        elif epoch == 75:
+            lr = 0.001
+        elif epoch == 105:
+            lr = 0.0001
+        else:
+            return
+
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr
+
+    def get_lr(optimizer):
+        for param_group in optimizer.param_groups:
+            return param_group['lr']
 
     # Load Dataset
     train_loader, test_loader = get_data(dataset_dir=dataset_dir)
@@ -39,6 +62,9 @@ def train():
 
         for idx, (x, labels) in enumerate(train_loader):
             batch_size_this_iter = x.size(0)
+
+            update_lr(optimizer, epoch, float(idx) / float(len(train_loader) - 1))
+            lr = get_lr(optimizer)
 
             preds = yolo(x)
             loss = criterion(preds, labels)

@@ -56,7 +56,7 @@ for epoch in range(num_epochs):
         # 현재 loss 출력
         if idx % print_freq == 0:
             print('Epoch [%d/%d], Iter [%d/%d], LR: %.6f, Loss: %.4f, Average Loss: %.4f'
-                  % (epoch, num_epochs, idx, len(train_loader), lr, loss_this_iter, total_loss / float(total_batch)))력
+                  % (epoch, num_epochs, idx, len(train_loader), lr, loss_this_iter, total_loss / float(total_batch)))
 
         # Validation.
         yolo.eval()

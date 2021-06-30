@@ -106,11 +106,11 @@ def get_data(dataset_dir='./datasets'):
     test_dataset = VOCdataset(dataset_dir, transforms=transforms.ToTensor(), mode='test')
 
     train_loader = DataLoader(dataset=train_dataset,
-                              batch_size=32,
+                              batch_size=64,
                               shuffle=True)
 
     test_loader = DataLoader(dataset=test_dataset,
                              shuffle=False,
-                             batch_size=32)
+                             batch_size=64)
 
     return train_loader, test_loader
