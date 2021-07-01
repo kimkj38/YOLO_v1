@@ -102,6 +102,7 @@ class YOLOv1(nn.Module):
 
         self.leaky = nn.LeakyReLU(negative_slope=0.1, inplace=True)
         self.dropout = nn.Dropout(0.5)
+        self.sigmoid = nn.Sigmoid()
 
 
     def forward(self, x):
@@ -113,7 +114,7 @@ class YOLOv1(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.dropout(self.leaky(self.conn_0(x)))
         x = self.leaky(self.conn_1(x))
-        x = torch.squeeze(x)
+        x = self.sigmoid(x)
 
         return x.view(-1, 7, 7, 30)
 
