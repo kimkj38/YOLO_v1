@@ -19,6 +19,7 @@ def train():
     # model
     yolo = YOLOv1()
     yolo.init_network()
+    yolo.cuda()
 
     # check params
     # summary(yolo, input_size=(3, 448, 448))
@@ -61,6 +62,8 @@ def train():
         total_batch = 0
 
         for idx, (x, labels) in enumerate(train_loader):
+            x = x.to('cuda')
+            labels = labels.to('cuda')
             batch_size_this_iter = x.size(0)
 
             update_lr(optimizer, epoch, float(idx) / float(len(train_loader) - 1))
